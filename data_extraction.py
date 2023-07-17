@@ -6,35 +6,15 @@ import pandas as pd
 import tabula
 import requests
 import boto3
-<<<<<<< HEAD
-
-=======
-import io
-import json
->>>>>>> 74c2085 (project added up to milestone_2)
 
 class DataExtractor():
 
     def __init__(self, connector):
-<<<<<<< HEAD
-        self.connector = connector
-
-    def read_rds_table(self, table_name):
-        if self.connector.engine:
-            try:
-                query = f"SELECT * FROM {table_name}"
-                with self.connector.engine.connect() as connection:
-                    result = connection.execute(query)
-                    data = result.fetchall()
-                    dataframe = pd.DataFrame(data, columns=result.keys())
-                    return dataframe
-=======
         '''
         The method is the constructor of the class and it takes a parameter called connector, which is 
         used to establish a connection to an external system or resource. The method assigns the value of 
         the connector parameter to the instance variable self.connector. This allows the instance of the 
         class to access and use the provided connector for its operations.
-
         '''
         self.connector = connector
 
@@ -51,25 +31,20 @@ class DataExtractor():
         '''
         if self.connector.engine:
             try:
-                query = f"SELECT * FROM {table_name}"
-                #query = sqlalchemy.text(f"SELECT * FROM {table_name}")
+                # query = f"SELECT * FROM {table_name}"
+                query = sqlalchemy.text(f"SELECT * FROM {table_name}")
                 with self.connector.engine.connect() as connection:
-                    result = connection.execute(query)
-                    data = result.fetchall()
-                    df = pd.DataFrame(data, columns=result.keys())
-                    return df
->>>>>>> 74c2085 (project added up to milestone_2)
+                    # result = connection.execute(query)
+                    # data = result.fetchall()
+                    # dataframe = pd.DataFrame(data, columns=result.keys())
+                    df_user = pd.read_sql_query(query, connection)
+                    return df_user
             except (sqlalchemy.exc.SQLAlchemyError, Exception) as error:
                 print("Error extracting data from table:", error)
         else:
             print("Database engine not initialized. Please initialize the engine first.")
 
     def retrieve_pdf_data(self, link):
-<<<<<<< HEAD
-        try:
-            # Extract data from all pages of the PDF
-            df_list = tabula.read_pdf(link, pages=all)
-=======
         '''
         The method takes two parameters self and link and provides a way of retrieving data from a PDF file
         using the 'tabula.read_pdf()' taking as parameters the link and pages will be extracted. The 
@@ -79,8 +54,7 @@ class DataExtractor():
         '''
         try:
             # Extract data from all pages of the PDF
-            df_list = tabula.read_pdf(link, pages='1-279')
->>>>>>> 74c2085 (project added up to milestone_2)
+            df_list = tabula.read_pdf(link, pages=all)
             # Concatenate the dataframes into a single dataframe
             df_card = pd.concat(df_list, ignore_index=True)
             return df_card             
@@ -89,10 +63,8 @@ class DataExtractor():
             return None 
     
     def list_number_of_stores(self, num_stores_endpoint, header_dict):
-<<<<<<< HEAD
-=======
         '''
-        The method takes three parameters self, num_of_stores(API endpoint) and header_dict(a dictionary 
+        The method takes three parameters self, num_stores_endpoint(API endpoint) and header_dict(a dictionary 
         containing the headers required for API requests). Using the function 'requests.get()' the method 
         sends an HTTP GET request to the API endpoint. Then, by using 'response.status_code', the method 
         checks if the status code is 200(indicating a successful response) and it proceeds to process the
@@ -102,36 +74,20 @@ class DataExtractor():
         during the HTTP request, the 'except' block will be executed, which prints the error message 
         indicating the problem.
         '''
->>>>>>> 74c2085 (project added up to milestone_2)
         try:
             response = requests.get(num_stores_endpoint, headers=header_dict)
             if response.status_code == 200:
                 data = response.json()
-<<<<<<< HEAD
-                number_of_stores = data['number_of_stores']
-                return number_of_stores
-=======
-                store_number = data['number_stores']
+                store_number = data['number_of_stores']
                 return store_number
->>>>>>> 74c2085 (project added up to milestone_2)
             else:
                 print("Error retrieving the number of stores. Status code:", response.status_code)
         except requests.exceptions.RequestException as error:
             print("Error connecting to the API:", error)
         return None
 
-<<<<<<< HEAD
 
     def retrieve_stores_date(self, store_endpoint, header_dict):
-        try:
-            response = requests.get(store_endpoint, headers=header_dict)
-            if response.status_code == 200:
-                data = response.json()
-                stores = data['stores']
-                df_stores = pd.DataFrame(stores)
-                return df_stores
-=======
-    def retrieve_stores_data(self, store_endpoint, header_dict):
         '''
         The method initialises an empty list 'df_stores' to store data frames for each store and an empty 
         list 'endpoints' to store the individual endpoints. A for loop was used to generate individual store
@@ -159,23 +115,16 @@ class DataExtractor():
                     data = response.json()
                 df_store = pd.DataFrame(data, index = [index])
                 df_stores.append(df_store)  
->>>>>>> 74c2085 (project added up to milestone_2)
             else:
                 print("Error retrieving stores data. Status code:", response.status_code)
         except requests.exceptions.RequestException as error:
             print("Error connecting to the API:", error)
-<<<<<<< HEAD
-
-        return None
-    
-    def extract_from_s3(self, s3_address):
-=======
         
         concat_df_stores = pd.concat(df_stores)
                 
         return concat_df_stores
     
-    def extract_s3(self, s3_address):
+    def extract_from_s3(self, s3_address):
         '''
         The method takes two parameters self and s3_address. The method initialises an S3 client using 
         'boto3' library to interact with AWS S3. It then extracts the 'bucket_name' and 'key'. Inside the
@@ -186,72 +135,17 @@ class DataExtractor():
         reading the CSV data from the string. The method returns the 'df_s3_products' and if an exception 
         occurs the 'except' block will be executed, displaying the error message.
         '''
->>>>>>> 74c2085 (project added up to milestone_2)
         s3 = boto3.client('s3')
         bucket_name, key = s3_address.split('/', 3)[2:]
 
         try:
             response = s3.get_object(Bucket = bucket_name, Key= key)
             products_data = response['Body'].read().decode('utf-8')
-<<<<<<< HEAD
-            df_s3_products = pd.read_csv(pd.compat.StringIO(products_data))
-=======
-            df_s3_products = pd.read_csv(io.StringIO(products_data))
->>>>>>> 74c2085 (project added up to milestone_2)
+            df_s3_products = pd.read_csv(pd.compat.StringIO(products_data)) #in other peace of code .compat was removed
             return df_s3_products
         except Exception as error:
             print("Error retrieving data from S3:", error)
-
         return None
-<<<<<<< HEAD
-
-
-
-# extractor = DataExtractor(connector)
-
-
-# table_names = connector.list_db_tables()
-# print("Tables in the database:")
-# for table_name in table_names:
-#     print(table_name)
-
-
-# df_user = extractor.read_rds_table(table_name)
-# print(df_user)
-
-# pdf_link = "https://data-handling-public.s3.eu-west-1.amazonaws.com/card_details.pdf"
-# # Extract data from all pages of the PDF
-# pdf_data = extractor.retrieve_pdf_data(pdf_link)
-# if pdf_data is not None:
-#     print(pdf_data)
-
-
-
-#### for list_number_of_stores method
-# creds_file = 'db_creds.yaml'
-# connector = DatabaseConnector(creds_file)
-# connector.init_db_engine()
-# extractor = DataExtractor(connector)
-# num_stores_endpoint = "https://aqj7u5id95.execute-api.eu-west-1.amazonaws.com/prod/number_stores"
-# header_dict = {'x-api-key': 'yFBQbwXe9J3sd6zWVAMrK6lcxxr0q1lr2PT6DDMX'}
-# number_of_stores = extractor.list_number_of_stores(num_stores_endpoint, header_dict)
-# if number_of_stores is not None:
-#     print("Number of stores:", number_of_stores)
-
-#### retrive_stores_data
-# store_endpoint = 'https://aqj7u5id95.execute-api.eu-west-1.amazonaws.com/prod/store_details/{store_number}'
-# stores_data = extractor.retrieve_stores_data(store_endpoint, header_dict)
-# if stores_data is not None:
-#     print(stores_data)
-
-### AWS
-# extractor = DataExtractor()
-# s3_address = 's3://data-handling-public/products.csv'
-# products_data = extractor.extract_from_s3(s3_address)
-# if products_data is not None:
-#     print(products_data)
-
-=======
     
     def retrieve_date_events_data(self, store_endpoint, header_dict):
         '''
@@ -273,6 +167,4 @@ class DataExtractor():
                 print("Error retrieving stores data. Status code:", response.status_code)
         except requests.exceptions.RequestException as error:
             print("Error connecting to the API:", error)
-
         return df_events_data
->>>>>>> 74c2085 (project added up to milestone_2)
