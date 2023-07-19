@@ -4,18 +4,17 @@ from sqlalchemy import create_engine, inspect
 import pandas as pd
 import getpass
 
-creds_file = '/Users/andreasyianni/Desktop/multinational-retail-data-centralisation/db_creds.yaml'
 
 class DatabaseConnector():
 
-    def __init__(self, creds_file):
-        ''' 
-        The __init__ method initializes variables related to a database connection, such as credentials,
-        engine, and connection objects. 
-        '''
-        self.creds = self.read_db_creds(creds_file)
-        self.engine = None
-        self.connection = None
+    # def __init__(self, creds_file):
+    #     ''' 
+    #     The __init__ method initializes variables related to a database connection, such as credentials,
+    #     engine, and connection objects. 
+    #     '''
+    #     self.creds = self.read_db_creds(creds_file)
+    #     self.engine = None
+    #     self.connection = None
 
 
     def read_db_creds(self, creds_file):
@@ -27,21 +26,21 @@ class DatabaseConnector():
             credentials = yaml.safe_load(file)
         return credentials
     
-    def init_db_engine(self):
+    def init_db_engine(self, creds):
         ''' 
         The init_db_engine initialises the database engine by using `create_engine` from sqlalchemy 
         library and the credentials retrieved from the function `read_db_creds`. Also a try and except 
         block were created to handle errors such as if the database was not initialised.
         '''
         try:
-            db_url = f"postgresql://{self.creds['RDS_USER']}:{self.creds['RDS_PASSWORD']}@{self.creds['RDS_HOST']}:{self.creds['RDS_PORT']}/{self.creds['RDS_DATABASE']}"
-            self.engine = sqlalchemy.create_engine(db_url)
+            db_url = f"postgresql://{creds['RDS_USER']}:{creds['RDS_PASSWORD']}@{creds['RDS_HOST']}:{creds['RDS_PORT']}/{creds['RDS_DATABASE']}"
+            engine = create_engine(db_url)
             print("Database engine initialized!")
         except (sqlalchemy.exc.SQLAlchemyError, Exception) as error:
             print("Error initializing database engine:", error)
-        return self.engine
+        return engine
     
-    def list_db_tables(self):
+    def list_db_tables(self, engine): #########
         ''' 
         In this function there are conditional if-else statements along with try, except blocks for 
         handling the errors. The engine was inspected by the inspector making sure that everything works 
@@ -78,4 +77,10 @@ class DatabaseConnector():
         else:
             print("Database engine not initialized. Please initialize the engine first.")
 
-connector = DatabaseConnector(creds_file)
+
+
+if __name__ == "__main__":
+    connector = DatabaseConnector()
+    creds_file = '/Users/andreasyianni/Desktop/multinational-retail-data-centralisation/db_creds.yaml'
+    creds = connector.read_db_creds(creds_file)
+    engine =  connector.init_db_engine()

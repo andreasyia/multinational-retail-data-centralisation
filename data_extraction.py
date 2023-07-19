@@ -7,6 +7,7 @@ import tabula
 import requests
 import boto3
 
+
 class DataExtractor():
 
     def __init__(self, connector):
@@ -141,11 +142,11 @@ class DataExtractor():
         try:
             response = s3.get_object(Bucket = bucket_name, Key= key)
             products_data = response['Body'].read().decode('utf-8')
-            df_s3_products = pd.read_csv(pd.compat.StringIO(products_data)) #in other peace of code .compat was removed
-            return df_s3_products
+            df_s3_products = pd.read_csv(products_data)
+            df_s3_products.to_string('test1.txt')
+            return df_s3_products.to_string('test2')
         except Exception as error:
             print("Error retrieving data from S3:", error)
-        return None
     
     def retrieve_date_events_data(self, store_endpoint, header_dict):
         '''

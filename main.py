@@ -17,7 +17,7 @@ s3_address = 's3://data-handling-public/products.csv'
 data_events_path = 'https://data-handling-public.s3.eu-west-1.amazonaws.com/date_details.json'
 
 # Instances
-connector = DatabaseConnector(creds_file)
+connector = DatabaseConnector()
 extractor = DataExtractor(connector)
 data_cleaner = DataCleaning(connector)
 
@@ -69,15 +69,16 @@ def extract_and_clean_store_data(connector, extractor, data_cleaner):
 def extract_and_clean_product_data(connector, extractor, data_cleaner):
 
     # Extracting data from S3
-    df_product = extractor.extract_s3(s3_address)
+    df_product = extractor.extract_from_s3(s3_address)
+    df_product.to_string('test2')
 
-    # Cleaning the extracted data
-    cleaned_data = data_cleaner.clean_products_data(df_product)
-    cleaned_data_weight = data_cleaner.convert_product_weights(cleaned_data)
-    cleaned_data_weight.to_string('product_details')
+    # # Cleaning the extracted data
+    # cleaned_data = data_cleaner.clean_products_data(df_product)
+    # cleaned_data_weight = data_cleaner.convert_product_weights(cleaned_data)
+    # cleaned_data_weight.to_string('product_details')
 
-    # Uploading the dataframe to SQL
-    connector.upload_to_db(cleaned_data_weight, 'dim_products')
+    # # Uploading the dataframe to SQL
+    # connector.upload_to_db(cleaned_data_weight, 'dim_products')
 
 def extract_and_clean_orders_data(connector, extractor, data_cleaner):
 
@@ -111,14 +112,11 @@ def extract_and_clean_date_events_data(connector, extractor, data_cleaner):
 
     return df_events_data
 
-extract_and_clean_user_data(connector, extractor, data_cleaner)
 
+
+# extract_and_clean_user_data(connector, extractor, data_cleaner)
 # extract_and_clean_card_data(connector, extractor, data_cleaner)
-
 # extract_and_clean_store_data(connector, extractor, data_cleaner)
-
-# extract_and_clean_product_data(connector, extractor, data_cleaner)
-
+extract_and_clean_product_data(connector, extractor, data_cleaner)
 # extract_and_clean_orders_data(connector, extractor, data_cleaner)
-
 # extract_and_clean_date_events_data(connector, extractor, data_cleaner)
