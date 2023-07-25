@@ -33,9 +33,9 @@ class DatabaseConnector():
     
     def list_db_tables(self, engine):
         ''' 
-        The 'list_db_tables' takes only one parameter 'engine'. In this function there are conditional 
+        The 'list_db_tables' takes only one parameter 'engine'. In this function, there are conditional 
         if-else statements along with try, except blocks for handling the errors. The inspector was used to 
-        retrieve the list of the table names present in the connected databbase and the code then prints the 
+        retrieve the list of the table names present in the connected database and the code then prints the 
         table names one by one using a loop.
         '''
         if engine:      
@@ -52,10 +52,10 @@ class DatabaseConnector():
 
     def upload_to_db(self, df, table_name):
         ''' 
-        The upload_to_db function is used to upload the data to a database in postgresql. For security 
-        reasons the getpass was used to provide the password for connecting to the database.Then, the 
+        The upload_to_db function is used to upload the data to a database in Postgresql. For security 
+        reasons the `getpass` was used to provide the password for connecting to the database.Then, the 
         self.engine is requesting a connection to the database using 'sqlalchemy.create_engine()' in 
-        postgresql and then, uploads the data with the specified name given for the table.
+        Postgresql and then, uploads the data with the specified name given for the table.
         '''
         password = getpass.getpass("Enter your password: ")
         sql_connection = (f'postgresql://postgres:{password}@localhost/sales_data')

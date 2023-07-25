@@ -19,7 +19,7 @@ class DataCleaning():
         df_user = df_user.replace(['NULL', 'N/A', 'None'], np.nan)
         df_user = df_user.dropna()
 
-        # Replace 'GGB' with 'GB' in column 'country_code' i havent done this yet
+        # Replace 'GGB' with 'GB' in column 'country_code' 
         df_user['country_code'] = df_user['country_code'].astype('str').apply(lambda x: x.replace('GGB', 'GB'))
 
         # Clean data by dropping rows with specified indexes
@@ -43,10 +43,10 @@ class DataCleaning():
         # Remove spaces from 'phone_number'
         df_user['phone_number'] = df_user['phone_number'].astype('str').apply(lambda x: x.replace(' ', ''))
 
-        # Replace [/,\n] with comma in 'address'
+        # Replace [/,\n] with a comma in 'address'
         df_user['address'] = df_user['address'].str.replace(r'[/,\n]', ',', regex=True)
 
-        # Convert to datetime format
+        # Convert to DateTime format
         df_user['date_of_birth'] = pd.to_datetime(df_user['date_of_birth'], infer_datetime_format=True, errors='coerce')
         df_user['join_date'] = pd.to_datetime(df_user['join_date'], infer_datetime_format=True, errors='coerce')
 
@@ -95,15 +95,15 @@ class DataCleaning():
         # Get indices of rows with NaT in 'opening_date' column
         indices = df_stores[df_stores['opening_date'].isna()].index
 
-        # Replace corresponding values in dataframe  with NaN
+        # Replace corresponding values in data frame with NaN
         df_stores['index'] = df_stores['index'].astype(int)
         df_stores.iloc[indices, 1:] = np.nan
 
-        # Clean 'ee' from continent column
+        # Clean 'ee' from the continent column
         df_stores['continent'] = df_stores['continent'].astype(str)
         df_stores['continent'] = df_stores['continent'].apply(lambda x: x[2:] if x.startswith('ee') else x)
 
-        # Convert 'longitude' column to numeric type
+        # Convert the 'longitude' column to a numeric type
         df_stores[['longitude', 'latitude']] = df_stores[['longitude', 'latitude']].apply(pd.to_numeric, errors='coerce')
 
         # Round longitude to 5 decimal points
@@ -157,7 +157,7 @@ class DataCleaning():
         def multiply_weight(weight):
             '''
             This function takes a weight value as input, checks if it is a string containing 'x' 
-            (e.g., "200g x 3"), and if so, extracts the numeric part after 'x', multiplies it with the 
+            (e.g., "200g x 3"), and if so, extract the numeric part after 'x', multiply it with the 
             numeric part before 'x', and returns the multiplied value with 'g' appended. 
             '''
             if isinstance(weight, str) and 'x' in weight:
@@ -192,7 +192,7 @@ class DataCleaning():
         def convert_weight_to_3_decimal_points(weight):
             '''
             This function rounds the weight value to three decimal points and returns it as a string with 
-            'kg' appended at the end of the string.
+            'kg' is appended at the end of the string.
             '''
             if isinstance(weight, str):
                 numeric_part = round(float(weight[:-2]), 3)  # Extract numeric part, convert to float, and round to 3 decimal places
