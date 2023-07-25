@@ -1,8 +1,3 @@
-import pandas as pd
-import numpy as np
-import sqlalchemy 
-import requests
-from sqlalchemy import create_engine
 from database_utils import DatabaseConnector
 from data_extraction import DataExtractor
 from data_cleaning import DataCleaning
@@ -22,24 +17,26 @@ extractor = DataExtractor(connector)
 data_cleaner = DataCleaning(connector)
 
 
-def extract_and_clean_user_data(connector, extractor, data_cleaner):
+
+def user_data(connector, extractor, data_cleaner):
     
     # Initiating database engine and listing the table names
-    connector.read_db_creds(creds_file)
-    connector.init_db_engine()
+    creds = connector.read_db_creds(creds_file)
+    engine = connector.init_db_engine(creds)
 
     # Extracting data from table
-    table_names = connector.list_db_tables()
+    table_names = connector.list_db_tables(engine)
     df_user = extractor.read_rds_table('legacy_users')
+    print(df_user)
 
     # Cleaning the extracted data
     cleaned_data = data_cleaner.clean_user_data(df_user)
     cleaned_data.to_string('users_data')
 
     # Uploading the dataframe to SQL
-    connector.upload_to_db(cleaned_data, 'dim_users')
+    connector.upload_to_db(cleaned_data, 'aggouraki')
 
-def extract_and_clean_card_data(connector, extractor, data_cleaner):
+def card_data(connector, extractor, data_cleaner):
 
     # Extracting data from pdf
     df_card = extractor.retrieve_pdf_data(pdf_link)
@@ -51,7 +48,7 @@ def extract_and_clean_card_data(connector, extractor, data_cleaner):
     # Uploading the dataframe to SQL
     connector.upload_to_db(cleaned_data, 'dim_card_details')
 
-def extract_and_clean_store_data(connector, extractor, data_cleaner):
+def store_data(connector, extractor, data_cleaner):
 
     # Extracting the number of tables 
     stores_number = extractor.list_number_of_stores(num_stores_endpoint, header_dict)
@@ -66,21 +63,20 @@ def extract_and_clean_store_data(connector, extractor, data_cleaner):
     # Uploading the dataframe to SQL
     connector.upload_to_db(cleaned_data, 'dim_store_details')
     
-def extract_and_clean_product_data(connector, extractor, data_cleaner):
+def product_data(connector, extractor, data_cleaner):
 
     # Extracting data from S3
     df_product = extractor.extract_from_s3(s3_address)
-    df_product.to_string('test2')
 
     # # Cleaning the extracted data
     # cleaned_data = data_cleaner.clean_products_data(df_product)
-    # cleaned_data_weight = data_cleaner.convert_product_weights(cleaned_data)
-    # cleaned_data_weight.to_string('product_details')
+    # cleaned_data = data_cleaner.convert_product_weights(cleaned_data)
+    # cleaned_data.to_string('product_details')
 
     # # Uploading the dataframe to SQL
     # connector.upload_to_db(cleaned_data_weight, 'dim_products')
 
-def extract_and_clean_orders_data(connector, extractor, data_cleaner):
+def orders_data(connector, extractor, data_cleaner):
 
      # Initiating database engine and listing the table names
     connector.read_db_creds(creds_file)
@@ -97,7 +93,7 @@ def extract_and_clean_orders_data(connector, extractor, data_cleaner):
     # Uploading the dataframe to SQL
     connector.upload_to_db(cleaned_data, 'orders_table')
 
-def extract_and_clean_date_events_data(connector, extractor, data_cleaner):
+def date_events_data(connector, extractor, data_cleaner):
 
     # Extract data from AWS
     df_events_data = extractor.retrieve_date_events_data(data_events_path, header_dict)
@@ -114,9 +110,17 @@ def extract_and_clean_date_events_data(connector, extractor, data_cleaner):
 
 
 
-# extract_and_clean_user_data(connector, extractor, data_cleaner)
-# extract_and_clean_card_data(connector, extractor, data_cleaner)
-# extract_and_clean_store_data(connector, extractor, data_cleaner)
-extract_and_clean_product_data(connector, extractor, data_cleaner)
-# extract_and_clean_orders_data(connector, extractor, data_cleaner)
-# extract_and_clean_date_events_data(connector, extractor, data_cleaner)
+user_data(connector, extractor, data_cleaner)
+# card_data(connector, extractor, data_cleaner)
+# store_data(connector, extractor, data_cleaner)
+# product_data(connector, extractor, data_cleaner)
+# orders_data(connector, extractor, data_cleaner)
+# date_events_data(connector, extractor, data_cleaner)
+# data_cleaner.clean_products_data(df_product)
+
+
+# if __name__ == "__main__":
+#     connector = DatabaseConnector()
+#     creds_file = '/Users/andreasyianni/Desktop/multinational-retail-data-centralisation/db_creds.yaml'
+#     creds = connector.read_db_creds(creds_file)
+#     engine =  connector.init_db_engine()

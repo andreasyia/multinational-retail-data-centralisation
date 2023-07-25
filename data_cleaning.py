@@ -142,7 +142,9 @@ class DataCleaning():
 
         # Rename column 1
         df_products = df_products.rename(columns={'Unnamed: 0': 'index'})
-        
+
+        # Remove "£" from column product_price
+        df_products['product_price'] = df_products['product_price'].astype(str).str.replace('£','')
         return df_products
     
     def convert_product_weights(self, df_products):
@@ -202,6 +204,9 @@ class DataCleaning():
         df_products['weight'] = df_products['weight'].apply(multiply_weight)
         df_products['weight'] = df_products['weight'].apply(convert_units_to_kg)
         df_products['weight'] = df_products['weight'].apply(convert_weight_to_3_decimal_points)
+
+        # Remove "kg" units from weight column 
+        df_products['weight'] = df_products['weight'].astype(str).str.replace('kg','')
 
         return df_products
     

@@ -6,7 +6,10 @@ import pandas as pd
 import tabula
 import requests
 import boto3
-
+import sys
+import os
+import csv
+import io
 
 class DataExtractor():
 
@@ -30,14 +33,10 @@ class DataExtractor():
         is printed, instructing the user to initialise the engine before attempting to read data. By 
         employing try-except blocks, the method ensures graceful error handling.
         '''
-        if self.connector.engine:
+        if self.connector:
             try:
-                # query = f"SELECT * FROM {table_name}"
                 query = sqlalchemy.text(f"SELECT * FROM {table_name}")
-                with self.connector.engine.connect() as connection:
-                    # result = connection.execute(query)
-                    # data = result.fetchall()
-                    # dataframe = pd.DataFrame(data, columns=result.keys())
+                with self.connector.init_db_engine.connect() as connection:
                     df_user = pd.read_sql_query(query, connection)
                     return df_user
             except (sqlalchemy.exc.SQLAlchemyError, Exception) as error:
@@ -128,26 +127,21 @@ class DataExtractor():
     def extract_from_s3(self, s3_address):
         '''
         The method takes two parameters self and s3_address. The method initialises an S3 client using 
-        'boto3' library to interact with AWS S3. It then extracts the 'bucket_name' and 'key'. Inside the
-        'try' block, the method uses the S3 client to get the object from the specified bucket and key
-        using 's3.get_object()'. The response contains the data which is read as a UTF-8 encoded string
-        using 'response['Body'].read().decode('utf-8')'. Then the data is read into a data frame 
-        'df_s3_products' using 'pd.read_csv(io.StringIO(products_data))'. The 'io.StringIO()' function allows 
-        reading the CSV data from the string. The method returns the 'df_s3_products' and if an exception 
-        occurs the 'except' block will be executed, displaying the error message.
+        'boto3' library to interact with AWS S3. It then extracts the 'bucket_name' and 'key'. Then the
+        data is downloaded in csv format named 'products.csv'. The path is given
+         
+           Then the
+        function 'download_file' was used to retrieve the data in csv format.
         '''
         s3 = boto3.client('s3')
         bucket_name, key = s3_address.split('/', 3)[2:]
-
-        try:
-            response = s3.get_object(Bucket = bucket_name, Key= key)
-            products_data = response['Body'].read().decode('utf-8')
-            df_s3_products = pd.read_csv(products_data)
-            df_s3_products.to_string('test1.txt')
-            return df_s3_products.to_string('test2')
-        except Exception as error:
-            print("Error retrieving data from S3:", error)
+        df_products = s3.download_file(bucket_name,key,'products.csv')
     
+        file_path = '/Users/andreasyianni/Desktop/multinational-retail-data-centralisation/products.csv'
+        df_products = pd.read_csv(file_path)
+        return df_products
+            
+        
     def retrieve_date_events_data(self, store_endpoint, header_dict):
         '''
         The method takes three parameters self, num_of_stores(API endpoint) and header_dict(a dictionary 
@@ -169,3 +163,6 @@ class DataExtractor():
         except requests.exceptions.RequestException as error:
             print("Error connecting to the API:", error)
         return df_events_data
+    
+
+    
