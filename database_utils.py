@@ -30,7 +30,6 @@ class DatabaseConnector():
             return engine
         except (sqlalchemy.exc.SQLAlchemyError, Exception) as error:
             print("Error initializing database engine:", error)
-        return None
     
     def list_db_tables(self, engine):
         ''' 
@@ -60,7 +59,7 @@ class DatabaseConnector():
         '''
         password = getpass.getpass("Enter your password: ")
         sql_connection = (f'postgresql://postgres:{password}@localhost/sales_data')
-        self.engine = create_engine(sql_connection) # sqlalcchemy removed
+        self.engine = sqlalchemy.create_engine(sql_connection) 
         if self.engine:
             try:
                 df.to_sql(table_name, self.engine, if_exists='replace', index=False)
@@ -74,6 +73,6 @@ class DatabaseConnector():
 
 if __name__ == "__main__":
     connector = DatabaseConnector()
-    creds_file = '/Users/andreasyianni/Desktop/multinational-retail-data-centralisation/db_creds.yaml'
+    creds_file = 'db_creds.yaml'
     creds = connector.read_db_creds(creds_file)
     engine =  connector.init_db_engine(creds)

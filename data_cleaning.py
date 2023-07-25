@@ -205,7 +205,7 @@ class DataCleaning():
         df_products['weight'] = df_products['weight'].apply(convert_units_to_kg)
         df_products['weight'] = df_products['weight'].apply(convert_weight_to_3_decimal_points)
 
-        # Remove "kg" units from weight column 
+        # Remove "kg" units from the weight column 
         df_products['weight'] = df_products['weight'].astype(str).str.replace('kg','')
 
         return df_products
