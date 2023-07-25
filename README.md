@@ -1,4 +1,3 @@
-# multinational-retail-data-centralisation
 # **Multinational-Retail-Data-Centralisation**
 This project aims to improve the data-driven decision-making process by centralizing sales data. Currently, the sales data is scattered across multiple sources, making it challenging to access and analyze. The main scope is to develop a system that stores all the company's sales data in a centralized database. Once the centralized database is set up, you will be able to query it to obtain up-to-date metrics for the business. In summary, this enables the company to have a single source of truth and facilitates data-driven decision-making processes.
 
