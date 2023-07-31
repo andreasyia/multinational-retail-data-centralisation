@@ -124,8 +124,8 @@ class DataExtractor():
         '''
         The method takes one parameter 's3_address'. The method initialises an S3 client using 
         'boto3' library to interact with AWS S3 and then, it extracts the 'bucket_name' and 'key'. The data
-        is downloaded in csv format named 'products.csv' and by using the method 'pd.read_csv(df_products_file)'
-        the data is converted to a pandas Dataframe and the function returns the 'df_products'.
+        is downloaded in CSV format named 'products.csv' and by using the method 'pd.read_csv(df_products_file)'
+        the data is converted to a pandas dataframe and the function returns the 'df_products'.
         '''
         s3 = boto3.client('s3')
         bucket_name, key = s3_address.split('/', 3)[2:]
