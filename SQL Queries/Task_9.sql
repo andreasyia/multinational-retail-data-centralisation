@@ -1,3 +1,4 @@
+-- How quickly is the company making sales?
 WITH cte_timestamp_column AS (
     SELECT
         year,
