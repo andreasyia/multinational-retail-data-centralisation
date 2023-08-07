@@ -1,10 +1,5 @@
 __pycache__
 .DS_Store
-card_data
-event_data
-orders_table
-product_details
-products.csv
-store_details
-users_data
-db_creds.yaml
+creds_utils.py
+*.csv
+*.yaml
