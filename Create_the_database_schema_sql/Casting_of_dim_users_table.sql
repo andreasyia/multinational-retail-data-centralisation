@@ -1,0 +1,7 @@
+ALTER TABLE dim_users_table
+ALTER COLUMN first_name VARCHAR(255,
+ALTER COLUMN last_name VARCHAR(255,
+ALTER COLUMN date_of_birth DATE,
+ALTER COLUMN country_code VARCHAR(2),
+ALTER COLUMN user_uuid UUID,
+ALTER COLUMN join_date DATE;

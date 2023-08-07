@@ -13,13 +13,11 @@ data_events_path = 'https://data-handling-public.s3.eu-west-1.amazonaws.com/date
 
 # Instances
 connector = DatabaseConnector()
-extractor = DataExtractor(connector)
+extractor = DataExtractor()
 data_cleaner = DataCleaning(connector)
 
-
-
 def user_data(connector, extractor, data_cleaner, creds_file):
-    
+
     # Initiating database engine and listing the table names
     creds = connector.read_db_creds(creds_file)
     engine = connector.init_db_engine(creds)
@@ -104,9 +102,3 @@ def date_events_data(connector, extractor, data_cleaner, data_events_path):
     # Uploading the dataframe to SQL
     connector.upload_to_db(cleaned_data, 'dim_date_times')
 
-# user_data(connector, extractor, data_cleaner, creds_file)
-# card_data(connector, extractor, data_cleaner, pdf_link)
-# store_data(connector, extractor, data_cleaner, num_stores_endpoint, header_dict, store_endpoint)
-# product_data(connector, extractor, data_cleaner, s3_address)
-# orders_data(connector, extractor, data_cleaner, creds_file)
-# date_events_data(connector, extractor, data_cleaner, data_events_path)

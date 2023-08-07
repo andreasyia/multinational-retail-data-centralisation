@@ -1,0 +1,7 @@
+ALTER TABLE orders_table
+ALTER COLUMN date_uuid UUID,
+ALTER COLUMN user_uuid UUID,
+ALTER COLUMN card_number VARCHAR(16),
+ALTER COLUMN store_code VARCHAR(10),
+ALTER COLUMN product_code VARCHAR(10),
+ALTER COLUMN product_quantity SMALLINT;

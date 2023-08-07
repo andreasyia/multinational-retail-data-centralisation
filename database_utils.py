@@ -1,27 +1,52 @@
-import yaml
-import sqlalchemy.exc
 from sqlalchemy import create_engine, inspect
-import pandas as pd
 import getpass
+import pandas as pd
+import sqlalchemy.exc
+import yaml
 
 class DatabaseConnector():
+    """
+    The class 'DatabaseConnector' facilitates interactions with a PostgreSQL database. It includes several methods 
+    to handle various aspects of connecting to the database, listing tables, and uploading data from a Pandas 
+    DataFrame to a database table.
 
+    Methods
+    -------
+    read_db_creds(self, creds_file)
+    init_db_engine(self, creds)
+    list_db_tables(self, engine)
+    upload_to_db(self, df, table_name)
+    """
+
+    
     def read_db_creds(self, creds_file):
         ''' 
-        The function 'read_db_creds' take as a parameter the 'creds_file' and returns the 
-        credentials for connecting to the database.
+        The 'read_db_creds' method reads the content of the YAML file which contains the database 
+        credentials.
+
+            Parameters:
+                    creds_file(String): Specifies the path to the YAML file
+
+            Returns:
+                    credentials(Dictionary): Contains the database connection information
         '''
         with open(creds_file, 'r') as file:
             credentials = yaml.safe_load(file)
+
         return credentials
     
     def init_db_engine(self, creds):
         ''' 
-        The 'init_db_engine' takes 'creds' as a parameter, a dictionary containing the 
-        database credentials. The 'db_url' constructs the database connection URL using the 'creds' and the 
-        'engine' which uses the 'create_engine' method to create the engine using the connection URL. If the
-        engine is successfully created, it prints "Database engine initialized" and if there is an error, it 
-        prints the error.
+        The 'init_db_engine' method creates an engine which acts as a connector to a database.
+
+        If the engine is successfully created, it prints "Database engine initialized" and if there is an 
+        error, it prints the error.
+
+            Parameters:
+                    creds(Dictionary): Contains the required information for database connection
+                
+            Returns:
+                    engine(SQLAlchemy Engine object): Can be used to interacct with thee PostgreSQL database
         '''
         try:
             db_url = f"postgresql://{creds['RDS_USER']}:{creds['RDS_PASSWORD']}@{creds['RDS_HOST']}:{creds['RDS_PORT']}/{creds['RDS_DATABASE']}"
@@ -33,15 +58,18 @@ class DatabaseConnector():
     
     def list_db_tables(self, engine):
         ''' 
-        The 'list_db_tables' takes only one parameter 'engine'. In this function, there are conditional 
-        if-else statements along with try, except blocks for handling the errors. The inspector was used to 
-        retrieve the list of the table names present in the connected database and the code then prints the 
-        table names one by one using a loop.
+        The 'list_db_tables' method is used to retrieve and print the names of the tables present in the connected 
+        database using the provided SQLAlchemy Engine.
+
+            Parameters:
+                    engine(SQLAlchemy Engine object): Can be used to interact with the PostgreSQL database
+            Returns:
+                    None
         '''
         if engine:      
             try:
                 inspector = sqlalchemy.inspect(engine)
-                table_names = inspector.get_table_names()
+                table_names = inspector.get_table_names() #list the table names
                 print("Tables in  the database:")
                 for table_name in table_names:
                     print(table_name)
@@ -52,14 +80,18 @@ class DatabaseConnector():
 
     def upload_to_db(self, df, table_name):
         ''' 
-        The upload_to_db function is used to upload the data to a database in Postgresql. For security 
-        reasons the 'getpass' was used to provide the password for connecting to the database.Then, the 
-        self.engine is requesting a connection to the database using 'sqlalchemy.create_engine()' in 
-        Postgresql and then, uploads the data with the specified name given for the table.
+        The 'upload_to_db' method is used to upload data from a Pandas DataFrame to a PostgreSQL database 
+        table. 
+
+            Parameters:
+                    df(Dataframe): DataFrame containing the data to be uploaded
+                    table_name(String): Specify the name of the database table
+            Returns:
+                    None
         '''
-        password = getpass.getpass("Enter your password: ")
-        sql_connection = (f'postgresql://postgres:{password}@localhost/sales_data')
-        self.engine = sqlalchemy.create_engine(sql_connection) 
+        password = getpass.getpass("Enter your password: ") # The function promts the user to tenter the databse password securely
+        sql_connection = (f'postgresql://postgres:{password}@localhost/sales_data') # It constructs the database connection URL
+        self.engine = sqlalchemy.create_engine(sql_connection) # It creates an SQLAlchemy Engine
         if self.engine:
             try:
                 df.to_sql(table_name, self.engine, if_exists='replace', index=False)
@@ -68,7 +100,6 @@ class DatabaseConnector():
                 print("Error uploading data to database:", error)
         else:
             print("Database engine not initialized. Please initialize the engine first.")
-
 
 
 if __name__ == "__main__":

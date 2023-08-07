@@ -1,0 +1,9 @@
+ALTER TABLE dim_products
+ALTER COLUMN product_price FLOAT,
+ALTER COLUMN weight FLOAT,
+ALTER COLUMN EAN VARCHAR(17),
+ALTER COLUMN product_code VARCHAR(11),
+ALTER COLUMN date_added DATE,
+ALTER COLUMN uuid UUID,
+ALTER COLUMN still_available BOOL,
+ALTER COLUMN weight_class VARCHAR(14);

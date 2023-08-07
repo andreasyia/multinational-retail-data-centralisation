@@ -1,34 +1,44 @@
-import yaml
-import json
-import sqlalchemy.exc
 from sqlalchemy import create_engine, inspect
-import pandas as pd
-import tabula
-import requests
 import boto3
-
+import json
+import pandas as pd
+import requests
+import sqlalchemy.exc
+import tabula
+import yaml
 
 class DataExtractor():
+    """
+    The class 'DataExtractor' is designed to extract data from various sources such as databases, files, 
+    APIs and web pages.
 
-    def __init__(self, connector):
-        '''
-        The method is the constructor of the class and it takes a parameter called connector, which is 
-        used to establish a connection to an external system or resource. The method assigns the value of 
-        the connector parameter to the instance variable self.connector. This allows the instance of the 
-        class to access and use the provided connector for its operations.
-        '''
-        self.connector = connector
+    Methods
+    -------
+    read_rds_table(self, table_name, engine)
+    retrieve_pdf_data(self, link)
+    list_number_of_stores(self, num_stores_endpoint, header_dict)
+    retrieve_stores_data(self, store_endpoint, header_dict, store_number)
+    extract_from_s3(self, s3_address)
+    retrieve_date_events_data(self, store_endpoint, header_dict)
+    """
 
+    
     def read_rds_table(self, table_name, engine):
         '''
-        The method takes two parameters 'table_name' and 'engine'. A query string is constructed which selects
-        all the columns of the specified table and then establishes a connection using the
-        'engine.connect()'. Once the connection it's established, the query it's executed using 
-        'pd.read_sql_query(query, connection)' and then , it returns the 'df_user'. Moreover, if an 
-        exception occurs during execution, an error message is printed indicating the issue. Additionally, 
-        if the database engine is not initialised, a message is printed, instructing the user to initialise 
-        the engine before attempting to read data. By employing try-except blocks, the method ensures 
-        graceful error handling.
+        The method 'read_rds_table' is responsible for reading data from a specified table in a relational 
+        database system.
+
+        A query string is constructed which selects all the columns of the specified table and then 
+        establishes a connection using the 'engine.connect()'. Once the connection it's established, the 
+        query it's executed using 'pd.read_sql_query(query, connection)'. Moreover, if an exception occurs 
+        during execution, an error message is printed regarding the issue arose.
+        
+            Parameters:
+                    table_name(String): Specify the name of the database table
+                    engine(SQLAlchemy Engine object): Establishing a connection to the database
+
+            Returns:
+                    df_user(Dataframe): A dataframe containing the data from the table returned
         '''
         if engine:
             try:
@@ -43,11 +53,13 @@ class DataExtractor():
 
     def retrieve_pdf_data(self, link):
         '''
-        The method takes one parameter 'link' and is used for retrieving data from a PDF file
-        using the 'tabula.read_pdf()' taking as parameters the link and pages will be extracted. The 
-        'pd.concat()' function is used to concatenate the data frame in 'df_list' into a single data frame
-        called 'df_card'. In any case of an exception during the data extraction, the except block will be 
-        executed, printing out an error message.
+        The method 'retrive_pdf_data' is responsible for extracting data from a PDF file.
+
+            Parameters:
+                    link(String): Represents the link to the PDF file
+
+            Returns:
+                    df_card(Dataframe): A dataframe containing the data from the PDF file
         '''
         try:
             # Extract data from all pages of the PDF
@@ -60,19 +72,19 @@ class DataExtractor():
     
     def list_number_of_stores(self, num_stores_endpoint, header_dict):
         '''
-        The method takes three parameters self, num_stores_endpoint(API endpoint) and header_dict(a dictionary 
-        containing the headers required for API requests). Using the function 'requests.get()' the method 
-        sends an HTTP GET request to the API endpoint. Then, by using 'response.status_code', the method 
-        checks if the status code is 200(indicating a successful response) and it proceeds to process the
-        data. The JSON response data is extracted using the 'response.json()' which contains the total 
-        number of stores and is assigned to the variable named 'store_number'. If the response code 
-        is not 200, an error message is printed indicating the status code. In case of exceptions 
-        during the HTTP request, the 'except' block will be executed, which prints the error message 
-        indicating the problem.
+        The method 'list_number_of_stores' is responsible for fetching the total number of stores from an 
+        API endpoint using an HTTP GET request.
+
+            Parameters:
+                    num_stores_endpoint(String): The API endpoint URL
+                    header_dict(Dictionary): A dictionary containing headers required for API requests
+            
+            Returns:
+                    store_number(Int): The number of stores
         '''
         try:
-            response = requests.get(num_stores_endpoint, headers=header_dict)
-            if response.status_code == 200:
+            response = requests.get(num_stores_endpoint, headers=header_dict) # It sends an HTTP GET request to the API endpoint
+            if response.status_code == 200: # Check if the status_code is 200 (indicating a successful response)
                 data = response.json()
                 store_number = data['number_stores'] 
                 return store_number
@@ -83,31 +95,30 @@ class DataExtractor():
 
     def retrieve_stores_data(self, store_endpoint, header_dict, store_number):
         '''
-        The function 'retrieve_stores_data' takes three parameters, the 'store_endpoint', 'header_dict' and 
-        'store_number'. The method initialises an empty list 'df_stores' to store the data frames for each 
-        store and an empty list named 'endpoints' to store the individual endpoints. A loop was used to 
-        generate individual store endpoints by iterating from 0 to 'store_number' and the URL of each store 
-        is now constructed using f-strings and appended to the 'endpoints' list. Inside the try block, the 
-        for loop iterates through the endpoints list and sends an HTTP GET request to each store's endpoint 
-        using the 'request.get()' function. The method checks that the response status code is 200 by using 
-        the function 'response.status_code' and the JSON response data is extracted using 'response.json()'. 
-        A data frame was created using 'pd.DataFrame()' and the loop appends it to the 'df_stores' list. If 
-        the response code is not 200, a message is printed indicating the status code and in case an exception 
-        occurs, it prints the error message showing the problem. After all the iterations, the method 
-        concatenates the 'df_stores' into a single data frame 'concat_df_stores' using 'pd.concat()'.
-        
+        The method 'retrieve_stores_data' is responsible for retrieving data for multiple stores from an API 
+        endpoint and combining the data into a single pandas DataFrame.
+
+            Parameters:
+                    store_endpoint(String): The base API endpoint for the stores 
+                    header_dict(Dictionary): A dictionary containing headers required for API requests
+                    store_number(Int): The number of stores
+
+            Returns:
+                    concat_df_stores(Dataframe): It returns the concatenated DataFrame 'concat_df_stores', 
+                                                 which contains the combined data for all the stores 
+                                                 retrieved from the API endpoint
         '''
+        # Initialises two empty lists 'df_stores' & 'endpoints'
         df_stores = []
         endpoints = []
-        
+        # Generates individual endpoints based on 'store_endpoint' & 'store_number' using f-strings ranging from 0 to 'store_number' and appends them to the 'endpoints' list
         for number in range(0, store_number):
             endpoint = f"{store_endpoint}/{number}"
             endpoints.append(endpoint)
-
         try:
             for index, endpoint in enumerate(endpoints):
-                response = requests.get(endpoint, headers=header_dict)
-                if response.status_code == 200:
+                response = requests.get(endpoint, headers=header_dict) # It sends an HTTP GET request to the API endpoint
+                if response.status_code == 200: # Check if the status_code is 200 (indicating a successful response)
                     data = response.json()
                 df_store = pd.DataFrame(data, index = [index])
                 df_stores.append(df_store)  
@@ -115,45 +126,50 @@ class DataExtractor():
                 print("Error retrieving stores data. Status code:", response.status_code)
         except requests.exceptions.RequestException as error:
             print("Error connecting to the API:", error)
-        
-        concat_df_stores = pd.concat(df_stores)
-                
+        concat_df_stores = pd.concat(df_stores) # Combining the data into a single pandas DataFrame  
+
         return concat_df_stores
     
     def extract_from_s3(self, s3_address):
         '''
-        The method takes one parameter 's3_address'. The method initialises an S3 client using 
-        'boto3' library to interact with AWS S3 and then, it extracts the 'bucket_name' and 'key'. The data
-        is downloaded in CSV format named 'products.csv' and by using the method 'pd.read_csv(df_products_file)'
-        the data is converted to a pandas dataframe and the function returns the 'df_products'.
+        The method 'extract_from_s3' is responsible for extracting data from an Amazon S3 bucket.
+
+            Parameters:
+                    s3_address(String): It represents the S3 address where the data is located
+
+            Returns:
+                    df_products(Dataframe): A dataframe containing the data extracted from the CSV file 
+                    stored in the specified S3 bucket
         '''
-        s3 = boto3.client('s3')
-        bucket_name, key = s3_address.split('/', 3)[2:]
-        df_products = s3.download_file(bucket_name,key,'products.csv')
-    
+        s3 = boto3.client('s3') # It initialises an S3 client using 'boto3' library to interact with AWS S3
+        bucket_name, key = s3_address.split('/', 3)[2:] # The split() function was used to separate the bucket name and key from the address
+        df_products = s3.download_file(bucket_name,key,'products.csv') # It downloads the data in CSV format
         df_products_file = 'products.csv'
         df_products = pd.read_csv(df_products_file)
-        return df_products
-            
+
+        return df_products  
         
     def retrieve_date_events_data(self, store_endpoint, header_dict):
         '''
-        The method takes two parameters 'num_of_stores'(API endpoint) and 'header_dict'(a dictionary 
-        containing the headers required for API requests). Using the function 'requests.get()' the method 
-        sends an HTTP GET request to the API endpoint. Then, by using 'response.status_code', the method 
-        checks if the status code is 200(indicating a successful response) and it proceeds to process the
-        data. The JSON response data is extracted using the 'response.json()' which contains the data. Then
-        a data frame was created named 'df_events_data' to store the data extracted. If the response code is
-        not 200, a message is printed indicating the status code and in case an exception occurs, it prints 
-        the error message showing the problem.
+        The method 'retrieve_date_events_data' is responsible for retrieving date events data from an API 
+        endpoint and converting it into a pandas DataFrame.
+
+            Parameters:
+                    store_endpoint(String): The API endpoint URL for date events data
+                    header_dict(Dictionary): A dictionary containing headers required for API requests
+
+            Returns:
+                    df_events_data(Dataframe): A dataframe containing the date events data extracted from the API endpoint
         '''
         try:
-            response = requests.get(store_endpoint, headers=header_dict)
-            if response.status_code == 200:
+            response = requests.get(store_endpoint, headers=header_dict) # It sends an HTTP GET request to the API endpoint
+            if response.status_code == 200: # Check if the status_code is 200 (indicating a successful response)
                 data = response.json()
                 df_events_data = pd.DataFrame(data)
             else:
                 print("Error retrieving stores data. Status code:", response.status_code)
         except requests.exceptions.RequestException as error:
             print("Error connecting to the API:", error)
+
         return df_events_data
+    

@@ -1,28 +1,46 @@
-import pandas as pd
 import numpy as np
+import pandas as pd
 import re
 
 class DataCleaning():
+    '''
+    The class 'DataCleaning' contains several methods designed to perform a sequence of data cleaning and 
+    transformation operations on several dataframes.
 
-    def __init__(self, connector):
-        '''
-        This method is the constructor of the class and it takes a parameter called connector, which is 
-        used to establish a connection to an external system or resource. The method assigns the value of 
-        the connector parameter to the instance variable self.connector. This allows the instance of the 
-        class to access and use the provided connector for its operations.
-        '''
-        self.connector = connector
+    Methods
+    -------
+    clean_user_data(self, df_user)
+    clean_card_data(self, df_card)
+    clean_store_data(self, df_stores)
+    clean_products_data(self, df_products)
+    convert_product_weights(self, df_products)
+    multiply_weight(weight)
+    convert_units_to_kg(weight)
+    convert_weight_to_3_decimal_points(weight)
+    clean_orders_data(self, df_orders)
+    clean_event_data(self, df_event_data)
+    '''
+
 
     def clean_user_data(self, df_user):
+        '''
+        The method 'clean_user_data' it performs a series of data cleaning and transformation operations on 
+        the input dataframe 'df_user'.
 
+            Parameters:
+                    df_user(Dataframe): A dataframe containing the user data 
+
+            Returns:
+                    df_user(Dataframe): A cleaned dataframe
+        '''
         # Drop NULL values
         df_user = df_user.replace(['NULL', 'N/A', 'None'], np.nan)
         df_user = df_user.dropna()
 
         # Replace 'GGB' with 'GB' in column 'country_code' 
         df_user['country_code'] = df_user['country_code'].astype('str').apply(lambda x: x.replace('GGB', 'GB'))
-
-        # Clean data by dropping rows with specified indexes
+       
+       # Clean data by dropping rows with specified indexes
         indexes = [752, 1046, 2995, 3536, 5306, 6420, 8386, 9013, 10211, 10360, 11366, 12177, 13111, 14101, 14499]
         df_user = df_user.drop(indexes)
 
@@ -53,7 +71,16 @@ class DataCleaning():
         return df_user
 
     def clean_card_data(self, df_card):
+        '''
+        The method 'clean_card_data' it performs a series of data cleaning and transformation operations on 
+        the input dataframe 'df_card'.
 
+            Parameters:
+                    df_card(Dataframe): A dataframe containing the card data 
+
+            Returns:
+                    df_card(Dataframe): A cleaned dataframe
+        '''
         # Replace NULL values with NaN
         df_card = df_card.replace(['NULL', 'N/A', 'None'], np.nan)
 
@@ -81,7 +108,16 @@ class DataCleaning():
         return df_card
 
     def clean_store_data(self, df_stores):
+        '''
+        The method 'clean_store_data' it performs a series of data cleaning and transformation operations on 
+        the input dataframe 'df_stores'.
 
+            Parameters:
+                    df_stores(Dataframe): A dataframe containing the store data 
+
+            Returns:
+                    df_stores(Dataframe): A cleaned dataframe
+        '''
         # Replace NULL with NaN
         df_stores = df_stores.replace(['NULL', 'N/A', 'None'], np.nan)
 
@@ -122,7 +158,16 @@ class DataCleaning():
         return df_stores
 
     def clean_products_data(self, df_products):
-    
+        '''
+        The method 'clean_products_data' it performs a series of data cleaning and transformation operations on 
+        the input dataframe 'df_stores'.
+
+            Parameters:
+                    df_products(Dataframe): A dataframe containing the products data 
+
+            Returns:
+                    df_products(Dataframe): A cleaned dataframe
+        '''
         # Find indices of entries starting with '£'
         df_products['product_price'] = df_products['product_price'].astype(str)
         indices = df_products[~df_products['product_price'].str.contains('£')].index
@@ -136,7 +181,6 @@ class DataCleaning():
             if isinstance(x, str) and x.endswith('.') 
             else x
             )
-        
         # Clean date columns
         df_products['date_added'] = pd.to_datetime(df_products['date_added'], errors ='coerce')
 
@@ -145,20 +189,33 @@ class DataCleaning():
 
         # Remove "£" from column product_price
         df_products['product_price'] = df_products['product_price'].astype(str).str.replace('£','')
+
         return df_products
     
     def convert_product_weights(self, df_products):
         '''
-        The convert_product_weights method is designed to modify and convert the weight column in the 
-        data frame 'df_products'. The method applies three different functions to transform the 
+        The 'convert_product_weights' method is designed to modify and convert the weight column in 
+        dataframe 'df_products'. The method applies three different functions to transform the 
         weight values in the DataFrame, the 'multiply_weight', 'convert_units_to_kg' and 
         'convert_weight_to_3_decimal_points'.
+
+        Parameters:
+                df_products(Dataframe): A dataframe containing the products data
+
+        Returns:
+                df_products(Dataframe): A cleaned dataframe
         '''   
         def multiply_weight(weight):
             '''
-            This function takes a weight value as input, checks if it is a string containing 'x' 
-            (e.g., "200g x 3"), and if so, extract the numeric part after 'x', multiply it with the 
-            numeric part before 'x', and returns the multiplied value with 'g' appended. 
+            The 'multiply_weight' function identifies strings with 'x' (e.g., "200g x 3"). If found, it 
+            multiplies the numeric part after 'x' by the numeric part before 'x', adding 'g' at the end to 
+            return the result.
+
+            Parameters:
+                    weight(String): The weight value containing 'x'
+
+            Returns:
+                    weight(String): The weight value with 'g' appended at the end of the string
             '''
             if isinstance(weight, str) and 'x' in weight:
                 parts = weight.split('x')
@@ -170,9 +227,15 @@ class DataCleaning():
                
         def convert_units_to_kg(weight):
             '''
-            This function converts the weight values to kilograms. It checks the unit (kg, g, ml, oz) at 
-            the end of the weight value and converts it accordingly. The weight is then returned as a 
-            string with 'kg' appended at the end of the string.
+            This function converts weight values to kilograms by identifying the unit (kg, g, ml, oz) at the 
+            end of the value and making the appropriate conversion. 
+            
+            Parameters:
+                    weight(String): The weight value
+
+            Returns:
+                    weight(String): The weight is returned as a string with 'kg' appended at the end of the 
+                                    string
             '''
             if isinstance(weight, str):
                 if weight.endswith('kg'):
@@ -187,16 +250,23 @@ class DataCleaning():
                 elif weight.endswith('oz'):
                     numeric_part = float(weight[:-2]) / 35.274
                     return str(numeric_part) + 'kg'
+                
             return weight
         
         def convert_weight_to_3_decimal_points(weight):
             '''
-            This function rounds the weight value to three decimal points and returns it as a string with 
-            'kg' is appended at the end of the string.
+            This function rounds the weight value to three decimal places and appends 'kg' to the result.
+            
+            Parameters:
+                    weight(String): The weight value
+
+            Returns:
+                    weight(String): The weight value in three decimal places
             '''
             if isinstance(weight, str):
                 numeric_part = round(float(weight[:-2]), 3)  # Extract numeric part, convert to float, and round to 3 decimal places
                 return str(numeric_part) + 'kg'
+            
             return weight
         
         # The apply() function is used to map each row of the 'weight' column through each of the three 
@@ -211,14 +281,31 @@ class DataCleaning():
         return df_products
     
     def clean_orders_data(self, df_orders):
-        
+        '''
+        The 'clean_orders_data' method it's only task is to drop a few columns.
+
+        Parameters:
+                df_orders(Dataframe): A dataframe containing the orders data 
+
+        Returns:
+                df_orders(Dataframe): A cleaned dataframe
+        '''
         # Drop the columns first-name, last_name and 1
         df_orders.drop(['first_name', 'last_name', '1'], axis=1, inplace=True)
 
         return df_orders
     
     def clean_event_data(self, df_event_data):
+        '''
+        The method 'clean_event_data' performs a series of data cleaning and transformation operations on 
+        the input dataframe 'df_event_data'.
 
+        Parameters:
+                df_event_data(Dataframe): A dataframe containing the event data
+
+        Returns:
+                df_event(Dataframe): A cleaned dataframe 
+        '''
         # Replace NULL values with 'Nan'
         df_event_data = df_event_data.replace(['NULL', 'N/A', 'None'], np.nan)
 
@@ -235,3 +322,4 @@ class DataCleaning():
         df_event_data['timestamp'] = pd.to_datetime(df_event_data['timestamp']).dt.time
 
         return df_event_data
+    
